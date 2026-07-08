@@ -103,7 +103,7 @@ def add_to_cart():
     cart.append(cart_item)
     print("Product added to cart successfully!")
 
-def remove_from_cart(): # REMAINING STOCK REMOVE OPTION :)
+def remove_from_cart(): 
     try:
         search = int(input("Enter the Product ID: "))
     except ValueError:
