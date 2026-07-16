@@ -206,7 +206,6 @@ Exiting the Shopping Cart System...
 
 ## Future Improvements
 
-* Search products by name or category
 * Product sorting and filtering
 * Discount and coupon system
 * User login system
