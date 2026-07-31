@@ -1,3 +1,4 @@
+
 # Shopping Cart System (Python)
 
 A beginner-friendly console-based Shopping Cart System built with Python using **Object-Oriented Programming (OOP)**. This project demonstrates how to manage products, carts, inventory, admin access, sales logs, and receipts while storing data permanently using **JSON File Handling**.
