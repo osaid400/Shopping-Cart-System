@@ -1,7 +1,7 @@
 # SHOPPING CART SYSTEM
 # Author: Muhammad Abdullah Farooq
 # Language: Python
-# Level: Beginner
+
 
 import sys
 import os
@@ -10,83 +10,84 @@ from datetime import datetime
 
 print ("============ Welcome to Shopping Cart System =============")
 
-# File Handling:
 
-def load_products():
-    if os.path.exists("products.json"):
-        with open("products.json", "r") as file:
-            data = json.load(file)
-        return data
-    else:
-        return []
+class Product:
 
-def save_products():
-    with open("products.json", "w") as file:
-        json.dump(products, file, indent=5)
+    def __init__(self, product_id, name, category, price, stock):
+        self.product_id = product_id
+        self.name = name
+        self.category = category
+        self.price = price
+        self.stock = stock
 
-products = load_products()
+    def to_dict(self):
+        return {
+            "Product ID": self.product_id,
+            "Name": self.name,
+            "Category": self.category,
+            "Price": self.price,
+            "Stock": self.stock
+        }
 
-if not products:
-    products = [
-    {"Product ID": 101, "Name": "Keyboard", "Category": "Electronics", "Price": 2500.0, "Stock": 15},
-    {"Product ID": 102, "Name": "Mouse", "Category": "Electronics", "Price": 1200.0, "Stock": 25},
-    {"Product ID": 103, "Name": "Monitor", "Category": "Electronics", "Price": 28500.0, "Stock": 8},
-    {"Product ID": 104, "Name": "Laptop", "Category": "Electronics", "Price": 125000.0, "Stock": 5},
-    {"Product ID": 105, "Name": "USB Flash Drive", "Category": "Accessories", "Price": 1800.0, "Stock": 30},
-    {"Product ID": 106, "Name": "External Hard Drive", "Category": "Storage", "Price": 14500.0, "Stock": 10},
-    {"Product ID": 107, "Name": "Printer", "Category": "Office", "Price": 22000.0, "Stock": 6},
-    {"Product ID": 108, "Name": "Notebook", "Category": "Stationery", "Price": 350.0, "Stock": 100},
-    {"Product ID": 109, "Name": "Pen", "Category": "Stationery", "Price": 50.0, "Stock": 250},
-    {"Product ID": 110, "Name": "Office Chair", "Category": "Furniture", "Price": 18500.0, "Stock": 7},
-    {"Product ID": 111, "Name": "Desk", "Category": "Furniture", "Price": 32000.0, "Stock": 4},
-    {"Product ID": 112, "Name": "Headphones", "Category": "Electronics", "Price": 6500.0, "Stock": 18},
-    {"Product ID": 113, "Name": "Webcam", "Category": "Electronics", "Price": 5400.0, "Stock": 12},
-    {"Product ID": 114, "Name": "Microphone", "Category": "Electronics", "Price": 8900.0, "Stock": 9},
-    {"Product ID": 115, "Name": "Router", "Category": "Networking", "Price": 7600.0, "Stock": 11},
-    {"Product ID": 116, "Name": "Power Bank", "Category": "Accessories", "Price": 4200.0, "Stock": 20},
-    {"Product ID": 117, "Name": "Smartphone", "Category": "Electronics", "Price": 78000.0, "Stock": 9},
-    {"Product ID": 118, "Name": "Tablet", "Category": "Electronics", "Price": 56000.0, "Stock": 7},
-    {"Product ID": 119, "Name": "Calculator", "Category": "Office", "Price": 1800.0, "Stock": 22},
-    {"Product ID": 120, "Name": "Projector", "Category": "Office", "Price": 47000.0, "Stock": 3},
-    {"Product ID": 121, "Name": "Ethernet Cable", "Category": "Networking", "Price": 650.0, "Stock": 50},
-    {"Product ID": 122, "Name": "HDMI Cable", "Category": "Accessories", "Price": 900.0, "Stock": 40},
-    {"Product ID": 123, "Name": "SSD 512GB", "Category": "Storage", "Price": 9800.0, "Stock": 14},
-    {"Product ID": 124, "Name": "Gaming Mouse", "Category": "Electronics", "Price": 4200.0, "Stock": 16},
-    {"Product ID": 125, "Name": "Mechanical Keyboard", "Category": "Electronics", "Price": 8500.0, "Stock": 10}
-    ]
-    save_products()
+    def from_dict(cls, data):
+        return cls(
+            product_id=data["Product ID"],
+            name=data["Name"],
+            category=data["Category"],
+            price=data["Price"],
+            stock=data["Stock"]
+        )
 
-def load_cart():
-    if os.path.exists("cart.json"):
-        with open("cart.json", "r") as file:
-            data = json.load(file)
-        return data
-    else:
-        return []
 
-cart = load_cart()
+class CartItem:
 
-def save_cart():
-    with open("cart.json", "w") as file:
-        json.dump(cart, file, indent=5)
+    def __init__(self, product, Quantity):
+        self.product = product
+        self.Quantity = Quantity
 
-cart = load_cart()
-if not cart:
-    cart = [
+    def subtotal(self):
+        return self.product.price * self.Quantity
 
-    ]
-    save_cart()
 
-# Fucntions:
+class Shopping_Cart_Manager:
 
-def print_product(product):
-    print(f"{product['Product ID']:<17} {product['Name']:<25} {product['Category']:<25} {format_currency(product['Price']):<30} {product['Stock']:<10}")
+    def __init__(self, filename = "products.json" , cart_file = "cart.json" ,products=None, cart=None):
+        self.products_file = filename
+        self.cart_file = cart_file
+        self.products = products if products is not None else []
+        self.cart = cart if cart is not None else []
 
-def print_cart(cart_item):
-    print(f"{cart_item['Product ID']:<17} {cart_item['Name']:<25} {cart_item['Category']:<25} {format_currency(cart_item['Price']):<30} {cart_item['Quantity']:<10} {cart_item['Total']:<10}")
+    def load_products(self):
+        if os.path.exists(self.products_file):
+            with open(self.products_file, "r") as file:
+                data = json.load(file)
+            return data
 
-def format_currency(salary):
-        return f"Rs. {salary:,}"
+    def load_cart(self):
+        if os.path.exists(self.cart_file):
+            with open(self.cart_file, "r") as file:
+                data = json.load(file)
+            return data
+
+    def save_cart(self):
+        with open(self.cart_file, "w") as file:
+            json.dump(self.cart, file, indent=5)
+
+    def save_products(self):
+        with open(self.products_file, "w") as file:
+            json.dump(self.products, file, indent=5)
+    
+    def print_product(self, product):
+        print(f"{product['Product ID']:<17} {product['Name']:<25} {product['Category']:<25} {self.format_currency(product['Price']):<30} {product['Stock']:<5}")
+
+    def print_cart(self, cart_item):
+        print(f"{cart_item['Product ID']:<17} {cart_item['Name']:<25} {cart_item['Category']:<25} {self.format_currency(cart_item['Price']):<30} {cart_item['Quantity']:<10} {self.format_currency(cart_item['Total']):<10}")
+
+    def format_currency(self, Price):
+        return f"Rs. {Price:,}"
+
+
+# -------------- OLD DATA ---------------------
 
 def view_products():
     if not products:
