@@ -86,116 +86,128 @@ class Shopping_Cart_Manager:
     def format_currency(self, Price):
         return f"Rs. {Price:,}"
 
+    def view_products(self):
+        if not self.products:
+            print("No Products in stocks!")
+            return
+        print("="*110)
+        print("{:<20} {:<24} {:<23} {:<28} {:<5}".format("Product ID", "Name", "Category", "Price", "Stock"))
+        print("="*110)
+        for product in self.products:
+            print(self.products(product))
+        print("="*110)
+
+    def find_product_by_id(self, product_id):
+        for product in self.products:
+            if product.product_id == product_id:
+                return product
+        return None
+
+    def add_to_cart(self):
+        try:
+            product_id = int(input("Enter the Product ID: "))
+        except ValueError:
+            print("Invalid Product ID! Please enter a number.")
+            return
+        if product_id <= 0:
+            print("Enter a valid Product ID!")
+            return
+    
+        product = next((p for p in self.products if p["Product ID"] == product_id), None)
+        if product is None:
+            print("Product not found!")
+            return
+        Name = product["Name"]
+        Category = product["Category"]
+        Price = product["Price"]
+    
+        try:
+            Quantity = int(input("Enter the quantity: "))
+            if Quantity <= 0:
+                print("Quantity must be a positive number!")
+                return
+        except ValueError:
+            print("Invalid quantity! Please enter a number.")
+            return
+
+        cart_item = {
+            "Product ID": product_id,
+            "Name": Name,
+            "Category": Category,
+            "Price": Price,
+            "Quantity": Quantity,
+        }
+
+        for product in self.products:
+            if product["Product ID"] == product_id:
+                if product["Stock"] < Quantity:
+                    print("Not enough stock available!")
+                    return
+                product["Stock"] -= Quantity
+                break
+
+        for item in self.cart:
+            if item["Product ID"] == product_id:
+                item["Quantity"] += Quantity
+                self.save_products()
+                self.save_cart()
+                print("Product added to cart successfully!")
+                return
+
+        self.cart.append(cart_item)
+        self.save_products()
+        self.save_cart()
+        print("Product added to cart successfully!")
+
+    def remove_from_cart(self): 
+        try:
+            search = int(input("Enter the Product ID: "))
+        except ValueError:
+            print("Invalid Product ID! Please enter a number.")
+            return
+        found = False
+        for cart_items in self.cart:
+            if cart_items["Product ID"] == search:
+                confirm = input(f"Are you sure you want to delete Product {cart_items['Name']}? (y/n): ")
+                if confirm.lower() != "y":
+                    print("Deletion cancelled.")
+                    return
+                self.cart.remove(cart_items)
+                for product in self.products:
+                    if product["Product ID"] == search:
+                        product["Stock"] += cart_items["Quantity"]
+                        self.save_cart()
+                        self.save_products()
+                        break
+
+                print("Item Removed Successfully!")
+                found = True
+                break
+        if not found:
+            print("Item Not Found!")
+
+    def view_cart(self):
+        if not self.cart:
+            print("=" * 30)
+            print("Cart is Empty!")
+            print("=" * 30)
+            return
+        print("------------------------------------------------------------ CART ITEMS ----------------------------------------------------------")
+        print("="*130)
+        print("{:<20} {:<24} {:<23} {:<24} {:<20} {:<15}".format("Product ID", "Name", "Category", "Price", "Quantity", "Total"))
+        print("="*130)
+        for cart_items in self.cart:
+            subtotal = cart_items["Price"] * cart_items["Quantity"]
+            print(f"{cart_items['Product ID']:<17} {cart_items['Name']:<25} {cart_items['Category']:<22} {self.format_currency(cart_items['Price']):<30} {cart_items['Quantity']:<15} {self.format_currency(subtotal):<10}")
+        print("="*130)
+        self.calculate_total()
+
+    def update_cart(self):
+        
+
+        
 
 # -------------- OLD DATA ---------------------
-
-def view_products():
-    if not products:
-        print("No Products in stocks!")
-        return
-    print("="*110)
-    print("{:<20} {:<24} {:<23} {:<28} {:<5}".format("Product ID", "Name", "Category", "Price", "Stock"))
-    print("="*110)
-    for product in products:
-        print_product(product)
-    print("="*110)
-
-def add_to_cart():
-    try:
-        product_id = int(input("Enter the Product ID: "))
-    except ValueError:
-        print("Invalid Product ID! Please enter a number.")
-        return
-    if product_id <= 0:
-        print("Enter a valid Product ID!")
-        return
-    
-    product = next((p for p in products if p["Product ID"] == product_id), None)
-    if product is None:
-        print("Product not found!")
-        return
-    Name = product["Name"]
-    Category = product["Category"]
-    Price = product["Price"]
-    
-    try:
-        Quantity = int(input("Enter the quantity: "))
-        if Quantity <= 0:
-            print("Quantity must be a positive number!")
-            return
-    except ValueError:
-        print("Invalid quantity! Please enter a number.")
-        return
-
-    cart_item = {
-        "Product ID": product_id,
-        "Name": Name,
-        "Category": Category,
-        "Price": Price,
-        "Quantity": Quantity,
-    }
-
-    for product in products:
-        if product["Product ID"] == product_id:
-            if product["Stock"] < Quantity:
-                print("Not enough stock available!")
-                return
-            product["Stock"] -= Quantity
-            break
-
-    for item in cart:
-        if item["Product ID"] == product_id:
-            item["Quantity"] += Quantity
-            save_products()
-            save_cart()
-            print("Product added to cart successfully!")
-            return
-
-    cart.append(cart_item)
-    save_products()
-    save_cart()
-    print("Product added to cart successfully!")
-
-def remove_from_cart(): 
-    try:
-        search = int(input("Enter the Product ID: "))
-    except ValueError:
-        print("Invalid Product ID! Please enter a number.")
-        return
-    found = False
-    for cart_items in cart:
-        if cart_items["Product ID"] == search:
-            confirm = input(f"Are you sure you want to delete Product {cart_items['Name']}? (y/n): ")
-            if confirm.lower() != "y":
-                print("Deletion cancelled.")
-                return
-            cart.remove(cart_items)
-            for product in products:
-                if product["Product ID"] == search:
-                    product["Stock"] += cart_items["Quantity"]
-                    save_cart()
-                    save_products()
-                    break
-
-            print("Item Removed Successfully!")
-            found = True
-            break
-    if not found:
-        print("Item Not Found!")
-
-def view_cart():
-    if not cart:
-        print("Cart is Empty!")
-        return
-    print("------------------------------------------------------------ CART ITEMS ----------------------------------------------------------")
-    print("="*130)
-    print("{:<20} {:<24} {:<23} {:<24} {:<20} {:<15}".format("Product ID", "Name", "Category", "Price", "Quantity", "Total"))
-    print("="*130)
-    for cart_items in cart:
-        subtotal = cart_items["Price"] * cart_items["Quantity"]
-        print(f"{cart_items['Product ID']:<17} {cart_items['Name']:<25} {cart_items['Category']:<22} {format_currency(cart_items['Price']):<30} {cart_items['Quantity']:<15} {format_currency(subtotal):<10}")
-    print("="*130)
-    calculate_total()
 
 def update_cart():
     if not cart:
