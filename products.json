@@ -1,177 +1,177 @@
 [
-     {
-          "Product ID": 101,
-          "Name": "Keyboard",
-          "Category": "Electronics",
-          "Price": 2500.0,
-          "Stock": 6
-     },
-     {
-          "Product ID": 102,
-          "Name": "Mouse",
-          "Category": "Electronics",
-          "Price": 1200.0,
-          "Stock": 25
-     },
-     {
-          "Product ID": 103,
-          "Name": "Monitor",
-          "Category": "Electronics",
-          "Price": 28500.0,
-          "Stock": 8
-     },
-     {
-          "Product ID": 104,
-          "Name": "Laptop",
-          "Category": "Electronics",
-          "Price": 125000.0,
-          "Stock": 2
-     },
-     {
-          "Product ID": 105,
-          "Name": "USB Flash Drive",
-          "Category": "Accessories",
-          "Price": 1800.0,
-          "Stock": 27
-     },
-     {
-          "Product ID": 106,
-          "Name": "External Hard Drive",
-          "Category": "Storage",
-          "Price": 14500.0,
-          "Stock": 10
-     },
-     {
-          "Product ID": 107,
-          "Name": "Printer",
-          "Category": "Office",
-          "Price": 22000.0,
-          "Stock": 6
-     },
-     {
-          "Product ID": 108,
-          "Name": "Notebook",
-          "Category": "Stationery",
-          "Price": 350.0,
-          "Stock": 100
-     },
-     {
-          "Product ID": 109,
-          "Name": "Pen",
-          "Category": "Stationery",
-          "Price": 50.0,
-          "Stock": 245
-     },
-     {
-          "Product ID": 110,
-          "Name": "Office Chair",
-          "Category": "Furniture",
-          "Price": 18500.0,
-          "Stock": 7
-     },
-     {
-          "Product ID": 111,
-          "Name": "Desk",
-          "Category": "Furniture",
-          "Price": 32000.0,
-          "Stock": 4
-     },
-     {
-          "Product ID": 112,
-          "Name": "Headphones",
-          "Category": "Electronics",
-          "Price": 6500.0,
-          "Stock": 18
-     },
-     {
-          "Product ID": 113,
-          "Name": "Webcam",
-          "Category": "Electronics",
-          "Price": 5400.0,
-          "Stock": 12
-     },
-     {
-          "Product ID": 114,
-          "Name": "Microphone",
-          "Category": "Electronics",
-          "Price": 8900.0,
-          "Stock": 9
-     },
-     {
-          "Product ID": 115,
-          "Name": "Router",
-          "Category": "Networking",
-          "Price": 7600.0,
-          "Stock": 11
-     },
-     {
-          "Product ID": 116,
-          "Name": "Power Bank",
-          "Category": "Accessories",
-          "Price": 4200.0,
-          "Stock": 20
-     },
-     {
-          "Product ID": 117,
-          "Name": "Smartphone",
-          "Category": "Electronics",
-          "Price": 78000.0,
-          "Stock": 9
-     },
-     {
-          "Product ID": 118,
-          "Name": "Tablet",
-          "Category": "Electronics",
-          "Price": 56000.0,
-          "Stock": 7
-     },
-     {
-          "Product ID": 119,
-          "Name": "Calculator",
-          "Category": "Office",
-          "Price": 1800.0,
-          "Stock": 22
-     },
-     {
-          "Product ID": 120,
-          "Name": "Projector",
-          "Category": "Office",
-          "Price": 47000.0,
-          "Stock": 3
-     },
-     {
-          "Product ID": 121,
-          "Name": "Ethernet Cable",
-          "Category": "Networking",
-          "Price": 650.0,
-          "Stock": 50
-     },
-     {
-          "Product ID": 122,
-          "Name": "HDMI Cable",
-          "Category": "Accessories",
-          "Price": 900.0,
-          "Stock": 40
-     },
-     {
-          "Product ID": 123,
-          "Name": "SSD 512GB",
-          "Category": "Storage",
-          "Price": 9800.0,
-          "Stock": 14
-     },
-     {
-          "Product ID": 124,
-          "Name": "Gaming Mouse",
-          "Category": "Electronics",
-          "Price": 4200.0,
-          "Stock": 16
-     },
-     {
-          "Product ID": 125,
-          "Name": "Mechanical Keyboard",
-          "Category": "Electronics",
-          "Price": 8500.0,
-          "Stock": 10
-     }
+    {
+        "Product ID": 101,
+        "Name": "Keyboard",
+        "Category": "Electronics",
+        "Price": 2500.0,
+        "Stock": 6
+    },
+    {
+        "Product ID": 102,
+        "Name": "Mouse",
+        "Category": "Electronics",
+        "Price": 1200.0,
+        "Stock": 25
+    },
+    {
+        "Product ID": 103,
+        "Name": "Monitor",
+        "Category": "Electronics",
+        "Price": 28500.0,
+        "Stock": 8
+    },
+    {
+        "Product ID": 104,
+        "Name": "Laptop",
+        "Category": "Electronics",
+        "Price": 125000.0,
+        "Stock": 6
+    },
+    {
+        "Product ID": 105,
+        "Name": "USB Flash Drive",
+        "Category": "Accessories",
+        "Price": 1800.0,
+        "Stock": 27
+    },
+    {
+        "Product ID": 106,
+        "Name": "External Hard Drive",
+        "Category": "Storage",
+        "Price": 14500.0,
+        "Stock": 10
+    },
+    {
+        "Product ID": 107,
+        "Name": "Printer",
+        "Category": "Office",
+        "Price": 22000.0,
+        "Stock": 6
+    },
+    {
+        "Product ID": 108,
+        "Name": "Notebook",
+        "Category": "Stationery",
+        "Price": 350.0,
+        "Stock": 100
+    },
+    {
+        "Product ID": 109,
+        "Name": "Pen",
+        "Category": "Stationery",
+        "Price": 50.0,
+        "Stock": 245
+    },
+    {
+        "Product ID": 110,
+        "Name": "Office Chair",
+        "Category": "Furniture",
+        "Price": 18500.0,
+        "Stock": 7
+    },
+    {
+        "Product ID": 111,
+        "Name": "Desk",
+        "Category": "Furniture",
+        "Price": 32000.0,
+        "Stock": 4
+    },
+    {
+        "Product ID": 112,
+        "Name": "Headphones",
+        "Category": "Electronics",
+        "Price": 6500.0,
+        "Stock": 18
+    },
+    {
+        "Product ID": 113,
+        "Name": "Webcam",
+        "Category": "Electronics",
+        "Price": 5400.0,
+        "Stock": 12
+    },
+    {
+        "Product ID": 114,
+        "Name": "Microphone",
+        "Category": "Electronics",
+        "Price": 8900.0,
+        "Stock": 9
+    },
+    {
+        "Product ID": 115,
+        "Name": "Router",
+        "Category": "Networking",
+        "Price": 7600.0,
+        "Stock": 10
+    },
+    {
+        "Product ID": 116,
+        "Name": "Power Bank",
+        "Category": "Accessories",
+        "Price": 4200.0,
+        "Stock": 20
+    },
+    {
+        "Product ID": 117,
+        "Name": "Smartphone",
+        "Category": "Electronics",
+        "Price": 78000.0,
+        "Stock": 9
+    },
+    {
+        "Product ID": 118,
+        "Name": "Tablet",
+        "Category": "Electronics",
+        "Price": 56000.0,
+        "Stock": 7
+    },
+    {
+        "Product ID": 119,
+        "Name": "Calculator",
+        "Category": "Office",
+        "Price": 1800.0,
+        "Stock": 22
+    },
+    {
+        "Product ID": 120,
+        "Name": "Projector",
+        "Category": "Office",
+        "Price": 47000.0,
+        "Stock": 3
+    },
+    {
+        "Product ID": 121,
+        "Name": "Ethernet Cable",
+        "Category": "Networking",
+        "Price": 650.0,
+        "Stock": 50
+    },
+    {
+        "Product ID": 122,
+        "Name": "HDMI Cable",
+        "Category": "Accessories",
+        "Price": 900.0,
+        "Stock": 40
+    },
+    {
+        "Product ID": 123,
+        "Name": "SSD 512GB",
+        "Category": "Storage",
+        "Price": 9800.0,
+        "Stock": 14
+    },
+    {
+        "Product ID": 124,
+        "Name": "Gaming Mouse",
+        "Category": "Electronics",
+        "Price": 4200.0,
+        "Stock": 16
+    },
+    {
+        "Product ID": 125,
+        "Name": "Mechanical Keyboard",
+        "Category": "Electronics",
+        "Price": 8500.0,
+        "Stock": 7
+    }
 ]

@@ -1,26 +1,24 @@
+# ==========================================
 # SHOPPING CART SYSTEM
-# Author: Muhammad Abdullah Farooq
-# Language: Python
+# Simple Customer Access & Admin Auth
+# Language: Python 3
+# ==========================================
 
-
-import sys
 import os
+import sys
 import json
 from datetime import datetime
 
-print ("============ Welcome to Shopping Cart System =============")
-
 
 class Product:
-
-    def __init__(self, product_id, name, category, price, stock):
+    def __init__(self, product_id: int, name: str, category: str, price: float, stock: int):
         self.product_id = product_id
         self.name = name
         self.category = category
         self.price = price
         self.stock = stock
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {
             "Product ID": self.product_id,
             "Name": self.name,
@@ -29,7 +27,8 @@ class Product:
             "Stock": self.stock
         }
 
-    def from_dict(cls, data):
+    @classmethod
+    def from_dict(cls, data: dict):
         return cls(
             product_id=data["Product ID"],
             name=data["Name"],
@@ -40,315 +39,469 @@ class Product:
 
 
 class CartItem:
-
-    def __init__(self, product, Quantity):
+    def __init__(self, product: Product, quantity: int):
         self.product = product
-        self.Quantity = Quantity
+        self.quantity = quantity
 
-    def subtotal(self):
-        return self.product.price * self.Quantity
+    def subtotal(self) -> float:
+        return self.product.price * self.quantity
+
+    def to_dict(self) -> dict:
+        return {
+            "Product ID": self.product.product_id,
+            "Quantity": self.quantity
+        }
 
 
-class Shopping_Cart_Manager:
+class User:
 
-    def __init__(self, filename = "products.json" , cart_file = "cart.json" ,products=None, cart=None):
-        self.products_file = filename
+    def __init__(self, username: str, password: str, role: str):
+        self.username = username
+        self.password = password
+        self.role = role
+
+    def to_dict(self) -> dict:
+        return {
+            "username": self.username,
+            "password": self.password,
+            "role": self.role
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict):
+        return cls(
+            username=data["username"],
+            password=data["password"],
+            role=data["role"]
+        )
+
+
+class ShoppingCartManager:
+    def __init__(self, products_file="products.json", cart_file="cart.json", users_file="users.json"):
+        self.products_file = products_file
         self.cart_file = cart_file
-        self.products = products if products is not None else []
-        self.cart = cart if cart is not None else []
+        self.users_file = users_file
+
+        self.products: list[Product] = []
+        self.cart: list[CartItem] = []
+        self.users: list[User] = []
+
+        self.load_products()
+        self.load_users()
+        self.load_cart()
 
     def load_products(self):
         if os.path.exists(self.products_file):
-            with open(self.products_file, "r") as file:
-                data = json.load(file)
-            return data
+            try:
+                with open(self.products_file, "r") as file:
+                    data = json.load(file)
+                    self.products = [Product.from_dict(item) for item in data]
+            except json.JSONDecodeError:
+                self.products = []
 
     def load_cart(self):
         if os.path.exists(self.cart_file):
-            with open(self.cart_file, "r") as file:
-                data = json.load(file)
-            return data
+            try:
+                with open(self.cart_file, "r") as file:
+                    data = json.load(file)
+                    self.cart = []
+                    for item in data:
+                        product = self.find_product_by_id(item["Product ID"])
+                        if product:
+                            self.cart.append(CartItem(product, item["Quantity"]))
+            except json.JSONDecodeError:
+                self.cart = []
 
-    def save_cart(self):
-        with open(self.cart_file, "w") as file:
-            json.dump(self.cart, file, indent=5)
+    def load_users(self):
+        if os.path.exists(self.users_file):
+            try:
+                with open(self.users_file, "r") as file:
+                    data = json.load(file)
+                    self.users = [User.from_dict(item) for item in data]
+            except json.JSONDecodeError:
+                self.users = []
+
+        if not self.users:
+            self.users = [User("admin", "123", "admin")]
+            self.save_users()
 
     def save_products(self):
         with open(self.products_file, "w") as file:
-            json.dump(self.products, file, indent=5)
-    
-    def print_product(self, product):
-        print(f"{product['Product ID']:<17} {product['Name']:<25} {product['Category']:<25} {self.format_currency(product['Price']):<30} {product['Stock']:<5}")
+            json.dump([p.to_dict() for p in self.products], file, indent=4)
 
-    def print_cart(self, cart_item):
-        print(f"{cart_item['Product ID']:<17} {cart_item['Name']:<25} {cart_item['Category']:<25} {self.format_currency(cart_item['Price']):<30} {cart_item['Quantity']:<10} {self.format_currency(cart_item['Total']):<10}")
+    def save_cart(self):
+        with open(self.cart_file, "w") as file:
+            json.dump([c.to_dict() for c in self.cart], file, indent=4)
 
-    def format_currency(self, Price):
-        return f"Rs. {Price:,}"
+    def save_users(self):
+        with open(self.users_file, "w") as file:
+            json.dump([u.to_dict() for u in self.users], file, indent=4)
+
+    @staticmethod
+    def format_currency(price: float) -> str:
+        return f"Rs. {price:,.2f}"
+
+    def find_product_by_id(self, product_id: int) -> Product | None:
+        return next((p for p in self.products if p.product_id == product_id), None)
+
+    def find_cart_item_by_id(self, product_id: int) -> CartItem | None:
+        return next((item for item in self.cart if item.product.product_id == product_id), None)
 
     def view_products(self):
         if not self.products:
-            print("No Products in stocks!")
+            print("\n[!] No Products in inventory!")
             return
-        print("="*110)
-        print("{:<20} {:<24} {:<23} {:<28} {:<5}".format("Product ID", "Name", "Category", "Price", "Stock"))
-        print("="*110)
-        for product in self.products:
-            print(self.products(product))
-        print("="*110)
 
-    def find_product_by_id(self, product_id):
-        for product in self.products:
-            if product.product_id == product_id:
-                return product
-        return None
+        print("\n" + "=" * 110)
+        print(f"{'Product ID':<15} {'Name':<25} {'Category':<20} {'Price':<25} {'Stock':<10}")
+        print("=" * 110)
+        for p in self.products:
+            print(f"{p.product_id:<15} {p.name:<25} {p.category:<20} {self.format_currency(p.price):<25} {p.stock:<10}")
+        print("=" * 110)
 
     def add_to_cart(self):
         try:
-            product_id = int(input("Enter the Product ID: "))
+            product_id = int(input("\nEnter Product ID: "))
         except ValueError:
-            print("Invalid Product ID! Please enter a number.")
+            print("[!] Invalid Product ID format!")
             return
-        if product_id <= 0:
-            print("Enter a valid Product ID!")
+
+        product = self.find_product_by_id(product_id)
+        if not product:
+            print("[!] Product not found!")
             return
-    
-        product = next((p for p in self.products if p["Product ID"] == product_id), None)
-        if product is None:
-            print("Product not found!")
-            return
-        Name = product["Name"]
-        Category = product["Category"]
-        Price = product["Price"]
-    
+
         try:
-            Quantity = int(input("Enter the quantity: "))
-            if Quantity <= 0:
-                print("Quantity must be a positive number!")
+            quantity = int(input(f"Enter quantity for '{product.name}': "))
+            if quantity <= 0:
+                print("[!] Quantity must be greater than 0.")
                 return
         except ValueError:
-            print("Invalid quantity! Please enter a number.")
+            print("[!] Invalid quantity input!")
             return
 
-        cart_item = {
-            "Product ID": product_id,
-            "Name": Name,
-            "Category": Category,
-            "Price": Price,
-            "Quantity": Quantity,
-        }
+        if product.stock < quantity:
+            print(f"[!] Stock shortfall! Only {product.stock} items available.")
+            return
 
-        for product in self.products:
-            if product["Product ID"] == product_id:
-                if product["Stock"] < Quantity:
-                    print("Not enough stock available!")
-                    return
-                product["Stock"] -= Quantity
-                break
+        product.stock -= quantity
+        cart_item = self.find_cart_item_by_id(product_id)
 
-        for item in self.cart:
-            if item["Product ID"] == product_id:
-                item["Quantity"] += Quantity
-                self.save_products()
-                self.save_cart()
-                print("Product added to cart successfully!")
-                return
+        if cart_item:
+            cart_item.quantity += quantity
+        else:
+            self.cart.append(CartItem(product, quantity))
 
-        self.cart.append(cart_item)
         self.save_products()
         self.save_cart()
-        print("Product added to cart successfully!")
+        print(f"[✓] Added {quantity}x '{product.name}' to cart successfully!")
 
-    def remove_from_cart(self): 
-        try:
-            search = int(input("Enter the Product ID: "))
-        except ValueError:
-            print("Invalid Product ID! Please enter a number.")
+    def remove_from_cart(self):
+        if not self.cart:
+            print("\n[!] Cart is empty!")
             return
-        found = False
-        for cart_items in self.cart:
-            if cart_items["Product ID"] == search:
-                confirm = input(f"Are you sure you want to delete Product {cart_items['Name']}? (y/n): ")
-                if confirm.lower() != "y":
-                    print("Deletion cancelled.")
-                    return
-                self.cart.remove(cart_items)
-                for product in self.products:
-                    if product["Product ID"] == search:
-                        product["Stock"] += cart_items["Quantity"]
-                        self.save_cart()
-                        self.save_products()
-                        break
 
-                print("Item Removed Successfully!")
-                found = True
-                break
-        if not found:
-            print("Item Not Found!")
+        try:
+            product_id = int(input("\nEnter Product ID to remove: "))
+        except ValueError:
+            print("[!] Invalid Product ID!")
+            return
+
+        cart_item = self.find_cart_item_by_id(product_id)
+        if not cart_item:
+            print("[!] Item not found in cart!")
+            return
+
+        confirm = input(f"Remove '{cart_item.product.name}' from cart? (y/n): ")
+        if confirm.lower() == 'y':
+            cart_item.product.stock += cart_item.quantity
+            self.cart.remove(cart_item)
+            self.save_cart()
+            self.save_products()
+            print("[✓] Item removed successfully!")
+        else:
+            print("[*] Removal cancelled.")
 
     def view_cart(self):
         if not self.cart:
-            print("=" * 30)
-            print("Cart is Empty!")
+            print("\n" + "=" * 30)
+            print("         Cart is Empty!        ")
             print("=" * 30)
             return
-        print("------------------------------------------------------------ CART ITEMS ----------------------------------------------------------")
-        print("="*130)
-        print("{:<20} {:<24} {:<23} {:<24} {:<20} {:<15}".format("Product ID", "Name", "Category", "Price", "Quantity", "Total"))
-        print("="*130)
-        for cart_items in self.cart:
-            subtotal = cart_items["Price"] * cart_items["Quantity"]
-            print(f"{cart_items['Product ID']:<17} {cart_items['Name']:<25} {cart_items['Category']:<22} {self.format_currency(cart_items['Price']):<30} {cart_items['Quantity']:<15} {self.format_currency(subtotal):<10}")
-        print("="*130)
+
+        print("\n" + "-" * 55 + " CART OVERVIEW " + "-" * 55)
+        print("=" * 120)
+        print(f"{'Product ID':<15} {'Name':<25} {'Category':<20} {'Price':<20} {'Quantity':<15} {'Total':<15}")
+        print("=" * 120)
+        for item in self.cart:
+            print(f"{item.product.product_id:<15} {item.product.name:<25} {item.product.category:<20} "
+                  f"{self.format_currency(item.product.price):<20} {item.quantity:<15} {self.format_currency(item.subtotal()):<15}")
+        print("=" * 120)
         self.calculate_total()
 
     def update_cart(self):
-        
+        if not self.cart:
+            print("\n[!] Cart is Empty! Nothing to update.")
+            return
 
-        
+        self.view_cart()
+        try:
+            product_id = int(input("\nEnter Product ID to update: "))
+        except ValueError:
+            print("[!] Invalid Product ID!")
+            return
 
-# -------------- OLD DATA ---------------------
+        cart_item = self.find_cart_item_by_id(product_id)
+        if not cart_item:
+            print("[!] Product not found in cart!")
+            return
 
-def update_cart():
-    if not cart:
-        print("Cart is Empty! Nothing to update.")
-        return
+        try:
+            new_quantity = int(input(f"Enter new quantity for '{cart_item.product.name}': "))
+            if new_quantity <= 0:
+                print("[!] Quantity must be positive. Use Remove option to delete item.")
+                return
+        except ValueError:
+            print("[!] Invalid quantity!")
+            return
 
-    view_cart()
-    try:
-        search = int(input("Enter the Product ID to update: "))
-    except ValueError:
-        print("Invalid Product ID! Please enter a number.")
-        return
+        available_stock = cart_item.product.stock + cart_item.quantity
+        if new_quantity > available_stock:
+            print(f"[!] Stock shortfall! Maximum available is {available_stock}.")
+            return
 
-    cart_item = next((c for c in cart if c["Product ID"] == search), None)
-    if cart_item is None:
-        print("Product not found in cart!")
-        return
+        cart_item.product.stock = available_stock - new_quantity
+        cart_item.quantity = new_quantity
 
-    try:
-        new_quantity = int(input("Enter the new quantity: "))
-    except ValueError:
-        print("Invalid quantity! Please enter a number.")
-        return
+        self.save_products()
+        self.save_cart()
+        print("[✓] Cart updated successfully!")
 
-    if new_quantity <= 0:
-        print("Quantity must be a positive number!")
-        return
+    def calculate_total(self) -> float:
+        grand_total = sum(item.subtotal() for item in self.cart)
+        print("-" * 120)
+        print(f"Grand Total: {self.format_currency(grand_total):>60}")
+        print("-" * 120)
+        return grand_total
 
-    product = next((p for p in products if p["Product ID"] == search), None)
-    if product is None:
-        print("Product not found in inventory!")
-        return
+    def checkout(self, customer_name="Guest"):
+        if not self.cart:
+            print("\n[!] Cannot checkout. Your cart is empty!")
+            return
 
-    # Restore the old quantity back to stock before checking availability
-    available_stock = product["Stock"] + cart_item["Quantity"]
-    if new_quantity > available_stock:
-        print("Not enough stock available!")
-        return
+        self.view_cart()
+        grand_total = sum(item.subtotal() for item in self.cart)
 
-    product["Stock"] = available_stock - new_quantity
-    cart_item["Quantity"] = new_quantity
-    save_products()
-    save_cart()
-    print("Cart Updated Successfully!")
+        phone = input("\nEnter customer phone number (optional): ").strip()
+        confirm = input(f"Proceed to checkout for '{customer_name}'? (y/n): ")
+        if confirm.lower() != 'y':
+            print("[*] Checkout cancelled.")
+            return
 
-def calculate_total():
-    grand_total = sum(item["Price"] * item["Quantity"] for item in cart)
-    print("-"*130)
-    print(f"Grand Total: {format_currency(grand_total):>60}")
-    print("-"*130)
-    return grand_total
+        lines = [
+            "\n" + "=" * 60,
+            f"{'SHOPPING CART - RECEIPT':^60}",
+            "=" * 60,
+            f"Customer : {customer_name}"
+        ]
+        if phone:
+            lines.append(f"Phone    : {phone}")
 
-def checkout():
-    if not cart:
-        print("Cart is Empty! Cannot proceed to checkout.")
-        return
+        lines.extend([
+            f"DateTime : {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+            "-" * 60,
+            f"{'ID':<6} {'Name':<22} {'Qty':>6} {'Subtotal':>22}",
+            "-" * 60
+        ])
 
-    view_cart()
-    grand_total = calculate_total()
+        for item in self.cart:
+            lines.append(f"{item.product.product_id:<6} {item.product.name[:20]:<22} {item.quantity:>6} {self.format_currency(item.subtotal()):>22}")
 
-    name = input("Enter customer name (leave blank for 'Guest'): ").strip() or "Guest"
-    phone = input("Enter customer phone (optional): ").strip()
+        lines.extend([
+            "-" * 60,
+            f"{'Grand Total:':>36} {self.format_currency(grand_total):>22}",
+            "=" * 60
+        ])
 
-    confirm = input(f"Proceed to checkout and generate bill for {name}? (y/n): ")
-    if confirm.lower() != 'y':
-        print("Checkout cancelled.")
-        return
+        print("\n".join(lines))
+        print("\n[✓] Checkout complete! Receipt generated.")
 
-    lines = []
-    lines.append("="*60)
-    lines.append("{:^60}".format("SHOPPING CART - RECEIPT"))
-    lines.append("="*60)
-    lines.append(f"Customer: {name}")
-    if phone:
-        lines.append(f"Phone   : {phone}")
-    lines.append(f"Date and Time   : {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    lines.append("-"*60)
-    lines.append("{:<6} {:<20} {:>7} {:>12}".format("ID","Name","Qty","Subtotal"))
-    lines.append("-"*60)
+        self.cart.clear()
+        self.save_cart()
+        self.save_products()
+        print("Thank you for shopping with us!")
 
-    for item in cart:
-        subtotal = item["Price"] * item["Quantity"]
-        lines.append("{:<6} {:<20} {:>6} {:>12}".format(item["Product ID"], item["Name"][:25], item["Quantity"], format_currency(subtotal)))
+    def add_new_product(self):
+        print("\n--- ADMIN: Add New Product ---")
+        try:
+            p_id = int(input("Enter Product ID: "))
+            if self.find_product_by_id(p_id):
+                print("[!] Product ID already exists!")
+                return
+            
+            name = input("Enter Product Name: ").strip()
+            category = input("Enter Category: ").strip()
+            price = float(input("Enter Price: "))
+            stock = int(input("Enter Initial Stock: "))
 
-    lines.append("-"*60)
-    lines.append(f"{'Grand Total:':>26} {format_currency(grand_total)}")
-    lines.append("="*60)
+            if price <= 0 or stock < 0:
+                print("[!] Price and Stock must be valid numbers!")
+                return
 
-    bill_text = "\n".join(lines)
+            new_prod = Product(p_id, name, category, price, stock)
+            self.products.append(new_prod)
+            self.save_products()
+            print(f"[✓] Product '{name}' added to inventory successfully!")
+        except ValueError:
+            print("[!] Invalid input format. Product creation failed.")
 
-    print(f"\n{bill_text}\n")
-    print("Receipt printed!.")
+    def update_stock(self):
+        print("\n--- ADMIN: Update Inventory Stock ---")
+        try:
+            p_id = int(input("Enter Product ID: "))
+            product = self.find_product_by_id(p_id)
+            if not product:
+                print("[!] Product not found!")
+                return
 
-    cart.clear()
-    save_cart()
-    save_products()
-    print("Thank you for shopping with us!")
+            print(f"Current Stock for '{product.name}': {product.stock}")
+            add_qty = int(input("Enter quantity to add to stock: "))
+            if add_qty <= 0:
+                print("[!] Added quantity must be positive.")
+                return
 
-def exit_system():
-    print("Thank you for shopping with us!")
-    print("Good Bye! Have a nice day!")
-    print("Exiting the Shopping Cart System...")
-    sys.exit()
+            product.stock += add_qty
+            self.save_products()
+            print(f"[✓] Stock updated! New stock for '{product.name}' is {product.stock}.")
+        except ValueError:
+            print("[!] Invalid number format.")
 
-while True:
-    print()
-    print("=============== Select the Option (0-7) ===============")
-    print("1. View Products")
-    print("2. Add to Cart")
-    print("3. Remove from Cart")
-    print("4. View Cart")
-    print("5. Update Cart")
-    print("6. Calculate Total")
-    print("7. Checkout")
-    print("0. Exit")
+    def delete_product(self):
+        print("\n--- ADMIN: Delete Product ---")
+        try:
+            p_id = int(input("Enter Product ID to delete: "))
+            product = self.find_product_by_id(p_id)
+            if not product:
+                print("[!] Product not found!")
+                return
 
-    try:
-        choice = int(input("Enter the number: "))
-    except ValueError:
-        print("Invalid Choice! Please enter a number.")
-        continue
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        continue
-    
-    if choice == 1:
-        view_products()
-    elif choice == 2:
-        add_to_cart()
-    elif choice == 3:
-        remove_from_cart()
-    elif choice == 4:
-        view_cart()
-    elif choice == 5:
-        update_cart()
-    elif choice == 6:
-        calculate_total()
-    elif choice == 7:
-        checkout()
-    elif choice == 0:
-        exit_system()
-        break
-    else:
-        print("Invalid choice! Please try again.")
+            confirm = input(f"Are you sure you want to PERMANENTLY delete '{product.name}'? (y/n): ")
+            if confirm.lower() == 'y':
+                self.products.remove(product)
+                self.save_products()
+                print("[✓] Product deleted from inventory.")
+            else:
+                print("[*] Action cancelled.")
+        except ValueError:
+            print("[!] Invalid Product ID.")
+
+
+def admin_menu(manager: ShoppingCartManager, admin_user: User):
+    while True:
+        print(f"\n================ ADMIN PANEL ========================")
+        print("1. View Inventory Products")
+        print("2. Add New Product to Inventory")
+        print("3. Update Inventory Stock")
+        print("4. Delete Product from Inventory")
+        print("0. Logout")
+        print("=========================================================")
+
+        choice = input("Select option (0-4): ").strip()
+
+        if choice == "1":
+            manager.view_products()
+        elif choice == "2":
+            manager.add_new_product()
+        elif choice == "3":
+            manager.update_stock()
+        elif choice == "4":
+            manager.delete_product()
+        elif choice == "0":
+            print(f"\n[*] Admin '{admin_user.username}' logged out successfully.")
+            break
+        else:
+            print("[!] Invalid option choice!")
+
+
+def customer_menu(manager: ShoppingCartManager, customer_name: str):
+
+    while True:
+        print(f"\n=============== CUSTOMER STORE =====================")
+        print("1. View Available Products")
+        print("2. Add Item to Cart")
+        print("3. Remove Item from Cart")
+        print("4. View Cart & Summary")
+        print("5. Update Quantity in Cart")
+        print("6. Calculate Total Price")
+        print("7. Complete Checkout")
+        print("0. Exit Store")
+        print("========================================================")
+
+        choice = input("Select option (0-7): ").strip()
+
+        if choice == "1":
+            manager.view_products()
+        elif choice == "2":
+            manager.add_to_cart()
+        elif choice == "3":
+            manager.remove_from_cart()
+        elif choice == "4":
+            manager.view_cart()
+        elif choice == "5":
+            manager.update_cart()
+        elif choice == "6":
+            manager.calculate_total()
+        elif choice == "7":
+            manager.checkout(customer_name=customer_name)
+        elif choice == "0":
+            print(f"\n[*] Customer '{customer_name}' exited from store.")
+            break
+        else:
+            print("[!] Invalid option choice!")
+
+
+def main():
+    manager = ShoppingCartManager()
+
+    while True:
+        print("\n============ WELCOME TO SHOPPING CART SYSTEM =============")
+        print("1. Continue as Customer")
+        print("2. Login as Admin")
+        print("0. Exit System")
+        print("=============================================================")
+
+        choice = input("Select option: ").strip()
+
+        if choice == "1":
+            name_input = input("\nEnter your name (Press Enter for 'Guest'): ").strip()
+            customer_name = name_input.title() if name_input else "Guest"
+            
+            print(f"\n[✓] Welcome to the store, {customer_name}!")
+            customer_menu(manager, customer_name)
+
+        elif choice == "2":
+            print("\n================== ADMIN LOGIN ==================")
+            username = input("Enter Admin Username: ").strip().lower()
+            password = input("Enter Admin Password: ").strip()
+            print("==================================================")
+
+            admin_user = next((u for u in manager.users if u.username == username and u.password == password and u.role == "admin"), None)
+
+            if admin_user:
+                print(f"\n[✓] Login successful! Welcome {admin_user.username.title()} (ADMIN)")
+                admin_menu(manager, admin_user)
+            else:
+                print("[!] Invalid Admin Credentials!")
+
+        elif choice == "0":
+            print("\n============================================================")
+            print("          Thank you for using Shopping Cart System!           ")
+            print("                  Good Bye! Have a nice day!                  ")
+            print("=============================================================")
+            sys.exit()
+        else:
+            print("[!] Invalid Choice! Please enter 1, 2, or 0.")
+
+
+if __name__ == "__main__":
+    main()
