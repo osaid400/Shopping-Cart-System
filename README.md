@@ -1,6 +1,6 @@
 # Shopping Cart System (Python)
 
-A beginner-friendly console-based Shopping Cart System built with Python. This project demonstrates how to manage products, carts, inventory, and receipts while storing data permanently using **JSON File Handling**.
+A beginner-friendly console-based Shopping Cart System built with Python using **Object-Oriented Programming (OOP)**. This project demonstrates how to manage products, carts, inventory, admin access, sales logs, and receipts while storing data permanently using **JSON File Handling**.
 
 ## Features
 
@@ -12,7 +12,10 @@ A beginner-friendly console-based Shopping Cart System built with Python. This p
 * Checkout with customer details
 * Generate receipt
 * Automatic stock management
-* Persistent data storage using JSON
+* **Admin Login System** (Default: `admin` / `123`)
+* **Add, Update, and Delete Products** (With product details confirmation before updating)
+* **Sales Record & Revenue Tracking** for Admin
+* Persistent data storage using JSON (`products.json`, `cart.json`, `users.json`, `sales.json`)
 * Input validation and exception handling
 
 ## Technologies Used
@@ -27,9 +30,11 @@ A beginner-friendly console-based Shopping Cart System built with Python. This p
 ```text
 Shopping-Cart-System/
 │
-├── shopping_cart.py
+├── Shopping_Cart_System.py
 ├── .gitignore
+├── products.json
 └── README.md
+
 ```
 
 ## How to Run
@@ -37,19 +42,22 @@ Shopping-Cart-System/
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/osaid400/Shopping-Cart-System.git
+git clone [https://github.com/osaid400/Shopping-Cart-System.git](https://github.com/osaid400/Shopping-Cart-System.git)
+
 ```
 
 ### 2. Navigate to the project folder
 
 ```bash
 cd Shopping-Cart-System
+
 ```
 
 ### 3. Run the program
 
 ```bash
 python shopping_cart.py
+
 ```
 
 ---
@@ -59,15 +67,30 @@ python shopping_cart.py
 ## Main Menu
 
 ```text
-=============== Select the Option (0-7) ===============
-1. View Products
-2. Add to Cart
-3. Remove from Cart
-4. View Cart
-5. Update Cart
-6. Calculate Total
-7. Checkout
-0. Exit
+============ WELCOME TO SHOPPING CART SYSTEM =============
+1. Continue as Customer
+2. Login as Admin
+0. Exit System
+==========================================================
+
+```
+
+---
+
+## Customer Menu
+
+```text
+=============== CUSTOMER STORE (Abdullah) ===============
+1. View Available Products
+2. Add Item to Cart
+3. Remove Item from Cart
+4. View Cart & Summary
+5. Update Quantity in Cart
+6. Calculate Total Price
+7. Complete Checkout
+0. Exit Store
+=========================================================
+
 ```
 
 ---
@@ -76,13 +99,13 @@ python shopping_cart.py
 
 ```text
 ==============================================================================================================
-Product ID          Name                     Category               Price                        Stock
+Product ID          Name                      Category             Price                     Stock
 ==============================================================================================================
-101                 Keyboard                 Electronics            Rs. 2,500.0                  15
-102                 Mouse                    Electronics            Rs. 1,200.0                  25
-103                 Monitor                  Electronics            Rs. 28,500.0                 8
-...
+101                 Keyboard                  Electronics          Rs. 2,500.00              15
+102                 Mouse                     Electronics          Rs. 1,200.00              25
+103                 Monitor                   Electronics          Rs. 28,500.00             8
 ==============================================================================================================
+
 ```
 
 ---
@@ -90,10 +113,11 @@ Product ID          Name                     Category               Price       
 ## Add Product to Cart
 
 ```text
-Enter the Product ID: 101
-Enter the quantity: 2
+Enter Product ID: 101
+Enter quantity for 'Keyboard': 2
 
-Product added to cart successfully!
+[✓] Added 2x 'Keyboard' to cart successfully!
+
 ```
 
 ---
@@ -101,14 +125,16 @@ Product added to cart successfully!
 ## View Cart
 
 ```text
------------------------------------------------------------- CART ITEMS ----------------------------------------------------------
-==================================================================================================================================
-Product ID          Name                     Category               Price                    Quantity            Total
-==================================================================================================================================
-101                 Keyboard                 Electronics            Rs. 2,500.0             2                   Rs. 5,000.0
-==================================================================================================================================
-Grand Total:                                                Rs. 5,000.0
-----------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------- CART OVERVIEW -------------------------------------------------------
+=============================================================================================================================
+Product ID          Name                      Category             Price                Quantity        Total
+=============================================================================================================================
+101                 Keyboard                  Electronics          Rs. 2,500.00             2         Rs. 5,000.00
+=============================================================================================================================
+-----------------------------------------------------------------------------------------------------------------------------
+Grand Total:                                                                                    Rs. 5,000.00
+-----------------------------------------------------------------------------------------------------------------------------
+
 ```
 
 ---
@@ -116,10 +142,11 @@ Grand Total:                                                Rs. 5,000.0
 ## Update Cart
 
 ```text
-Enter the Product ID to update: 101
-Enter the new quantity: 4
+Enter Product ID to update: 101
+Enter new quantity for 'Keyboard': 4
 
-Cart Updated Successfully!
+[✓] Cart updated successfully!
+
 ```
 
 ---
@@ -127,10 +154,11 @@ Cart Updated Successfully!
 ## Remove Product
 
 ```text
-Enter the Product ID: 101
-Are you sure you want to delete Product Keyboard? (y/n): y
+Enter Product ID to remove: 101
+Remove 'Keyboard' from cart? (y/n): y
 
-Item Removed Successfully!
+[✓] Item removed successfully!
+
 ```
 
 ---
@@ -138,9 +166,10 @@ Item Removed Successfully!
 ## Calculate Total
 
 ```text
-----------------------------------------------------------------------------------------------------------------------------------
-Grand Total:                                                Rs. 35,400.0
-----------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------
+Grand Total:                              Rs. 35,400.00
+---------------------------------------------------------------
+
 ```
 
 ---
@@ -148,30 +177,94 @@ Grand Total:                                                Rs. 35,400.0
 ## Checkout
 
 ```text
-Enter customer name (leave blank for 'Guest'): Abdullah
-Enter customer phone (optional): 03001234567
-Proceed to checkout and generate bill for Abdullah? (y/n): y
+Enter customer phone number (optional): 03001234567
+Proceed to checkout for 'Abdullah'? (y/n): y
+
 ```
 
 ```text
 ============================================================
                   SHOPPING CART - RECEIPT
 ============================================================
-Customer: Abdullah
-Phone   : 03001234567
-Date and Time   : 2026-07-16 18:30:21
+Customer : Abdullah
+Phone    : 03001234567
+DateTime : 2026-07-31 11:15:00
 ------------------------------------------------------------
-ID     Name                  Qty     Subtotal
+ID     Name                   Qty               Subtotal
 ------------------------------------------------------------
-101    Keyboard               2       Rs. 5,000.0
-102    Mouse                  3       Rs. 3,600.0
+101    Keyboard                 2           Rs. 5,000.00
+102    Mouse                    3           Rs. 3,600.00
 ------------------------------------------------------------
-              Grand Total: Rs. 8,600.0
+                                Grand Total: Rs. 8,600.00
 ============================================================
 
-Receipt printed!
+[✓] Checkout complete! Receipt generated.
 
 Thank you for shopping with us!
+
+```
+
+---
+
+## Admin Menu
+
+```text
+================ ADMIN PANEL (ADMIN) ================
+1. View Inventory Products
+2. Add New Product to Inventory
+3. Update Inventory Details (Price & Stock)
+4. Delete Product from Inventory
+5. View Sales Records & Revenue
+0. Logout
+=====================================================
+
+```
+
+---
+
+## Admin: Update Inventory Details (With Confirmation)
+
+```text
+Enter Product ID: 101
+
+==================================================
+         CURRENT PRODUCT DETAILS         
+==================================================
+  Product ID    : 101
+  Name          : Keyboard
+  Category      : Electronics
+  Price         : Rs. 2,500.00
+  Current Stock : 15
+==================================================
+
+Do you want to update this product? (y/n): y
+Enter new price (Press Enter to keep current price '2500.0'): 2700
+Enter additional stock to add (Press Enter to keep current stock '15'): 5
+
+[✓] Product 'Keyboard' details updated successfully!
+    New Price: Rs. 2,700.00 | New Total Stock: 20
+
+```
+
+---
+
+## Admin: Sales History & Revenue Report
+
+```text
+==========================================================================================
+                                  SALES HISTORY & RECORD
+==========================================================================================
+Sale ID: #1  |  Date: 2026-07-31 11:15:00  |  Customer: Abdullah (Phone: 03001234567)
+------------------------------------------------------------------------------------------
+  ID     Product Name                   Qty            Price               Subtotal            
+  101    Keyboard                        2          Rs. 2,500.00         Rs. 5,000.00        
+  102    Mouse                           3          Rs. 1,200.00         Rs. 3,600.00        
+  Total Sale Amount: Rs. 8,600.00
+==========================================================================================
+
+[★] OVERALL TOTAL REVENUE GENERATED: Rs. 8,600.00
+==========================================================================================
+
 ```
 
 ---
@@ -179,18 +272,21 @@ Thank you for shopping with us!
 ## Exit
 
 ```text
-Thank you for shopping with us!
-Good Bye! Have a nice day!
-Exiting the Shopping Cart System...
+==============================================
+  Thank you for using Shopping Cart System! 
+        Good Bye! Have a nice day!         
+==============================================
+
 ```
 
 ---
 
 ## Concepts Covered
 
+* Object-Oriented Programming (OOP - Classes & Methods)
+* Role-based Logic (Customer vs Admin)
 * Functions
-* Lists
-* Dictionaries
+* Lists and Dictionaries
 * Loops
 * Conditional Statements
 * JSON File Handling
@@ -200,7 +296,7 @@ Exiting the Shopping Cart System...
 * Exception Handling
 * `datetime` Module
 * Searching and Updating Records
-* Receipt Generation
+* Receipt Generation & Sales History Logging
 
 ---
 
@@ -208,10 +304,8 @@ Exiting the Shopping Cart System...
 
 * Product sorting and filtering
 * Discount and coupon system
-* User login system
-* Sales history
-* SQLite Database
-* Object-Oriented Programming (OOP) version
+* SQLite Database Integration
+* Password hashing for security
 * GUI using Tkinter or CustomTkinter
 
 ---
@@ -220,19 +314,22 @@ Exiting the Shopping Cart System...
 
 This project helped me practice:
 
-* Building a complete menu-driven application
-* Managing inventory using JSON
-* Persisting shopping cart data
-* Updating stock automatically
+* Building a complete menu-driven application with OOP
+* Managing inventory using persistent JSON files
+* Implementing role-based access control (Admin vs Customer)
+* Persisting shopping cart data and recording transaction histories
+* Confirming existing details before updating product records
+* Updating stock automatically upon checkout
 * Performing CRUD operations
-* Working with nested dictionaries and lists
-* Generating formatted receipts
+* Generating formatted receipts and sales reports
 * Improving problem-solving and debugging skills
 
 ---
 
-## Author
+## Author:
 
 **Muhammad Abdullah Farooq**
 
 GitHub: https://github.com/osaid400
+
+```
