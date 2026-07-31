@@ -137,7 +137,7 @@
         "Name": "Projector",
         "Category": "Office",
         "Price": 47000.0,
-        "Stock": 3
+        "Stock": 2
     },
     {
         "Product ID": 121,
@@ -171,7 +171,7 @@
         "Product ID": 125,
         "Name": "Mechanical Keyboard",
         "Category": "Electronics",
-        "Price": 8500.0,
-        "Stock": 7
+        "Price": 8000.0,
+        "Stock": 5
     }
 ]

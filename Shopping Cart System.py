@@ -1,6 +1,7 @@
 # ==========================================
 # SHOPPING CART SYSTEM
-# Simple Customer Access & Admin Auth
+# Simple Customer Access & Admin Auth + Sales Log
+# Author: Muhammad Abdullah Farooq
 # Language: Python 3
 # ==========================================
 
@@ -52,9 +53,8 @@ class CartItem:
             "Quantity": self.quantity
         }
 
-
+    
 class User:
-
     def __init__(self, username: str, password: str, role: str):
         self.username = username
         self.password = password
@@ -77,18 +77,21 @@ class User:
 
 
 class ShoppingCartManager:
-    def __init__(self, products_file="products.json", cart_file="cart.json", users_file="users.json"):
+    def __init__(self, products_file="products.json", cart_file="cart.json", users_file="users.json", sales_file="sales.json"):
         self.products_file = products_file
         self.cart_file = cart_file
         self.users_file = users_file
+        self.sales_file = sales_file
 
         self.products: list[Product] = []
         self.cart: list[CartItem] = []
         self.users: list[User] = []
+        self.sales: list[dict] = []
 
         self.load_products()
         self.load_users()
         self.load_cart()
+        self.load_sales()
 
     def load_products(self):
         if os.path.exists(self.products_file):
@@ -125,6 +128,14 @@ class ShoppingCartManager:
             self.users = [User("admin", "123", "admin")]
             self.save_users()
 
+    def load_sales(self):
+        if os.path.exists(self.sales_file):
+            try:
+                with open(self.sales_file, "r") as file:
+                    self.sales = json.load(file)
+            except json.JSONDecodeError:
+                self.sales = []
+
     def save_products(self):
         with open(self.products_file, "w") as file:
             json.dump([p.to_dict() for p in self.products], file, indent=4)
@@ -136,6 +147,10 @@ class ShoppingCartManager:
     def save_users(self):
         with open(self.users_file, "w") as file:
             json.dump([u.to_dict() for u in self.users], file, indent=4)
+
+    def save_sales(self):
+        with open(self.sales_file, "w") as file:
+            json.dump(self.sales, file, indent=4)
 
     @staticmethod
     def format_currency(price: float) -> str:
@@ -298,6 +313,9 @@ class ShoppingCartManager:
             print("[*] Checkout cancelled.")
             return
 
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        # 1. Print Receipt
         lines = [
             "\n" + "=" * 60,
             f"{'SHOPPING CART - RECEIPT':^60}",
@@ -308,14 +326,22 @@ class ShoppingCartManager:
             lines.append(f"Phone    : {phone}")
 
         lines.extend([
-            f"DateTime : {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+            f"DateTime : {timestamp}",
             "-" * 60,
             f"{'ID':<6} {'Name':<22} {'Qty':>6} {'Subtotal':>22}",
             "-" * 60
         ])
 
+        purchased_items = []
         for item in self.cart:
             lines.append(f"{item.product.product_id:<6} {item.product.name[:20]:<22} {item.quantity:>6} {self.format_currency(item.subtotal()):>22}")
+            purchased_items.append({
+                "product_id": item.product.product_id,
+                "name": item.product.name,
+                "quantity": item.quantity,
+                "price": item.product.price,
+                "subtotal": item.subtotal()
+            })
 
         lines.extend([
             "-" * 60,
@@ -325,6 +351,18 @@ class ShoppingCartManager:
 
         print("\n".join(lines))
         print("\n[✓] Checkout complete! Receipt generated.")
+
+        # 2. Record Sales Log for Admin
+        sale_record = {
+            "sale_id": len(self.sales) + 1,
+            "timestamp": timestamp,
+            "customer_name": customer_name,
+            "phone": phone if phone else "N/A",
+            "items": purchased_items,
+            "grand_total": grand_total
+        }
+        self.sales.append(sale_record)
+        self.save_sales()
 
         self.cart.clear()
         self.save_cart()
@@ -355,8 +393,8 @@ class ShoppingCartManager:
         except ValueError:
             print("[!] Invalid input format. Product creation failed.")
 
-    def update_stock(self):
-        print("\n--- ADMIN: Update Inventory Stock ---")
+    def update_stock_and_details(self):
+        print("\n--- ADMIN: Update Inventory Details ---")
         try:
             p_id = int(input("Enter Product ID: "))
             product = self.find_product_by_id(p_id)
@@ -364,17 +402,42 @@ class ShoppingCartManager:
                 print("[!] Product not found!")
                 return
 
-            print(f"Current Stock for '{product.name}': {product.stock}")
-            add_qty = int(input("Enter quantity to add to stock: "))
-            if add_qty <= 0:
-                print("[!] Added quantity must be positive.")
+            # Display all existing product details for confirmation
+            print("\n" + "=" * 50)
+            print("         CURRENT PRODUCT DETAILS         ")
+            print("=" * 50)
+            print(f"  Product ID    :   {product.product_id}")
+            print(f"  Name          :   {product.name}")
+            print(f"  Category      :   {product.category}")
+            print(f"  Price         :   {self.format_currency(product.price)}")
+            print(f"  Current Stock :   {product.stock}")
+            print("=" * 50)
+
+            confirm = input("\nDo you want to update this product? (y/n): ").strip().lower()
+            if confirm != 'y':
+                print("[*] Update cancelled.")
                 return
 
-            product.stock += add_qty
+            # Option to update price
+            update_price_input = input(f"Enter new price (Press Enter to keep current price '{product.price}'): ").strip()
+            if update_price_input:
+                new_price = float(update_price_input)
+                if new_price > 0:
+                    product.price = new_price
+
+            # Option to add stock
+            add_stock_input = input(f"Enter additional stock to add (Press Enter to keep current stock '{product.stock}'): ").strip()
+            if add_stock_input:
+                additional_stock = int(add_stock_input)
+                if additional_stock > 0:
+                    product.stock += additional_stock
+
             self.save_products()
-            print(f"[✓] Stock updated! New stock for '{product.name}' is {product.stock}.")
+            print(f"\n[✓] Product '{product.name}' details updated successfully!")
+            print(f"    New Price: {self.format_currency(product.price)} | New Total Stock: {product.stock}")
+
         except ValueError:
-            print("[!] Invalid number format.")
+            print("[!] Invalid input format.")
 
     def delete_product(self):
         print("\n--- ADMIN: Delete Product ---")
@@ -395,27 +458,55 @@ class ShoppingCartManager:
         except ValueError:
             print("[!] Invalid Product ID.")
 
+    def view_sales_report(self):
+        if not self.sales:
+            print("\n[!] No sales record found yet!")
+            return
+
+        print("\n" + "=" * 90)
+        print(f"{'SALES HISTORY & RECORD':^90}")
+        print("=" * 90)
+
+        total_revenue = 0.0
+
+        for sale in self.sales:
+            print(f"Sale ID: #{sale['sale_id']}  |  Date: {sale['timestamp']}  |  Customer: {sale['customer_name']} (Phone: {sale['phone']})")
+            print("-" * 90)
+            print(f"  {'ID':<6} {'Product Name':<30} {'Qty':<10} {'Price':<20} {'Subtotal':<20}")
+            for item in sale['items']:
+                print(f"  {item['product_id']:<6} {item['name'][:28]:<30} {item['quantity']:<10} {self.format_currency(item['price']):<20} {self.format_currency(item['subtotal']):<20}")
+            
+            print(f"  Total Sale Amount: {self.format_currency(sale['grand_total'])}")
+            print("=" * 90)
+            total_revenue += sale['grand_total']
+
+        print(f"\n[★] OVERALL TOTAL REVENUE GENERATED: {self.format_currency(total_revenue)}")
+        print("=" * 90)
+
 
 def admin_menu(manager: ShoppingCartManager, admin_user: User):
     while True:
-        print(f"\n================ ADMIN PANEL ========================")
+        print(f"\n================ ADMIN PANEL ({admin_user.username.upper()}) ================")
         print("1. View Inventory Products")
         print("2. Add New Product to Inventory")
-        print("3. Update Inventory Stock")
+        print("3. Update Inventory Details (Price & Stock)")
         print("4. Delete Product from Inventory")
+        print("5. View Sales Records & Revenue")
         print("0. Logout")
         print("=========================================================")
 
-        choice = input("Select option (0-4): ").strip()
+        choice = input("Select option (0-5): ").strip()
 
         if choice == "1":
             manager.view_products()
         elif choice == "2":
             manager.add_new_product()
         elif choice == "3":
-            manager.update_stock()
+            manager.update_stock_and_details()
         elif choice == "4":
             manager.delete_product()
+        elif choice == "5":
+            manager.view_sales_report()
         elif choice == "0":
             print(f"\n[*] Admin '{admin_user.username}' logged out successfully.")
             break
@@ -424,9 +515,8 @@ def admin_menu(manager: ShoppingCartManager, admin_user: User):
 
 
 def customer_menu(manager: ShoppingCartManager, customer_name: str):
-
     while True:
-        print(f"\n=============== CUSTOMER STORE =====================")
+        print(f"\n=============== CUSTOMER STORE ({customer_name}) ===============")
         print("1. View Available Products")
         print("2. Add Item to Cart")
         print("3. Remove Item from Cart")
@@ -435,7 +525,7 @@ def customer_menu(manager: ShoppingCartManager, customer_name: str):
         print("6. Calculate Total Price")
         print("7. Complete Checkout")
         print("0. Exit Store")
-        print("========================================================")
+        print("=========================================================")
 
         choice = input("Select option (0-7): ").strip()
 
@@ -468,7 +558,7 @@ def main():
         print("1. Continue as Customer")
         print("2. Login as Admin")
         print("0. Exit System")
-        print("=============================================================")
+        print("==========================================================")
 
         choice = input("Select option: ").strip()
 
@@ -480,10 +570,9 @@ def main():
             customer_menu(manager, customer_name)
 
         elif choice == "2":
-            print("\n================== ADMIN LOGIN ==================")
+            print("\n--- ADMIN LOGIN ---")
             username = input("Enter Admin Username: ").strip().lower()
             password = input("Enter Admin Password: ").strip()
-            print("==================================================")
 
             admin_user = next((u for u in manager.users if u.username == username and u.password == password and u.role == "admin"), None)
 
@@ -494,10 +583,10 @@ def main():
                 print("[!] Invalid Admin Credentials!")
 
         elif choice == "0":
-            print("\n============================================================")
-            print("          Thank you for using Shopping Cart System!           ")
-            print("                  Good Bye! Have a nice day!                  ")
-            print("=============================================================")
+            print("\n===========================================")
+            print("  Thank you for using Shopping Cart System! ")
+            print("        Good Bye! Have a nice day!         ")
+            print("===========================================")
             sys.exit()
         else:
             print("[!] Invalid Choice! Please enter 1, 2, or 0.")

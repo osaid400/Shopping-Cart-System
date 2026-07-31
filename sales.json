@@ -1,0 +1,25 @@
+[
+    {
+        "sale_id": 1,
+        "timestamp": "2026-07-31 11:11:21",
+        "customer_name": "Guest",
+        "phone": "N/A",
+        "items": [
+            {
+                "product_id": 125,
+                "name": "Mechanical Keyboard",
+                "quantity": 2,
+                "price": 8000.0,
+                "subtotal": 16000.0
+            },
+            {
+                "product_id": 120,
+                "name": "Projector",
+                "quantity": 1,
+                "price": 47000.0,
+                "subtotal": 47000.0
+            }
+        ],
+        "grand_total": 63000.0
+    }
+]
